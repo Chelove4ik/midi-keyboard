@@ -2,6 +2,8 @@ import sys
 import time
 from os import walk
 
+from append_music import append_music
+
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtMultimedia import QSound
@@ -51,6 +53,9 @@ class MyWidget(QMainWindow):
                    self.pushButton_n: [0, QSound('music\\{}'.format(zv_n))],
                    self.pushButton_m: [0, QSound('music\\{}'.format(zv_m))],
                    }
+
+        for i in self.tm:
+            i.setStyleSheet("background-color: white")
 
         for button in self.tm:
             if self.tm[button][0] != 0:
@@ -141,7 +146,11 @@ class MyWidget(QMainWindow):
     def run(self, button):
         self.tm[button][0] = time.clock()
         button.setStyleSheet("background-color: yellow")
+
         self.tm[button][1].play()
+
+        append_music(self.tm[button][1].fileName())
+
         for but in self.tm:
             if self.tm[but][0] != 0:
                 if time.clock() - self.tm[but][0] > 0.1:
