@@ -1,13 +1,21 @@
 import sys
-import time
 from os import walk
-
-from append_music import append_music
+from time import clock
 
 from PyQt5 import uic
 from PyQt5.QtCore import Qt
 from PyQt5.QtMultimedia import QSound
 from PyQt5.QtWidgets import QApplication, QMainWindow
+
+from Pydub_script import *
+
+with open('num_sound.txt', 'r', encoding='utf8') as fnum_sound:
+    num_sound = fnum_sound.read()
+    if num_sound is '':
+        num_sound = 1
+    else:
+        num_sound = int(num_sound)
+        num_sound += 1
 
 f = []
 for (dirpath, dirnames, filenames) in walk('music'):
@@ -17,15 +25,19 @@ for (dirpath, dirnames, filenames) in walk('music'):
 try:
     zv_q, zv_w, zv_e, zv_r, zv_t, zv_y, zv_u, zv_i, zv_o, zv_p, zv_a, zv_s, zv_d = f[:13]
     zv_f, zv_g, zv_h, zv_j, zv_k, zv_l, zv_z, zv_x, zv_c, zv_v, zv_b, zv_n, zv_m = f[13:26]
-except:
+except Exception:
     print('Слишком мало семплов')
     exit(0)
+
+list_of_song = []
 
 
 class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('untitled.ui', self)
+        self.start = False
+        self.first_start = True
         self.tm = {self.pushButton_q: [0, QSound('music\\{}'.format(zv_q))],
                    self.pushButton_w: [0, QSound('music\\{}'.format(zv_w))],
                    self.pushButton_e: [0, QSound('music\\{}'.format(zv_e))],
@@ -59,7 +71,7 @@ class MyWidget(QMainWindow):
 
         for button in self.tm:
             if self.tm[button][0] != 0:
-                if time.clock() - self.tm[button][0] > 1:
+                if clock() - self.tm[button][0] > 1:
                     button.setStyleSheet("background-color: white")
 
         self.pushButton_q.clicked.connect(lambda: self.run(self.pushButton_q))
@@ -88,6 +100,7 @@ class MyWidget(QMainWindow):
         self.pushButton_b.clicked.connect(lambda: self.run(self.pushButton_b))
         self.pushButton_n.clicked.connect(lambda: self.run(self.pushButton_n))
         self.pushButton_m.clicked.connect(lambda: self.run(self.pushButton_m))
+        self.pushButton_start_record.clicked.connect(lambda: self.start_stop_record())
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_Q:
@@ -142,19 +155,47 @@ class MyWidget(QMainWindow):
             self.run(self.pushButton_n)
         elif event.key() == Qt.Key_M:
             self.run(self.pushButton_m)
+        else:
+            for but in self.tm:
+                if self.tm[but][0] != 0:
+                    if clock() - self.tm[but][0] > 0.1:
+                        but.setStyleSheet("background-color: white")
 
     def run(self, button):
-        self.tm[button][0] = time.clock()
+        self.tm[button][0] = clock()
         button.setStyleSheet("background-color: yellow")
 
         self.tm[button][1].play()
 
-        append_music(self.tm[button][1].fileName())
+        if self.start and self.first_start:
+            self.first_start = False
+            self.st_time = clock()
+
+        if self.start:
+            list_of_song.append([self.tm[button][1].fileName(), clock() - self.st_time])
 
         for but in self.tm:
             if self.tm[but][0] != 0:
-                if time.clock() - self.tm[but][0] > 0.1:
+                if clock() - self.tm[but][0] > 0.1:
                     but.setStyleSheet("background-color: white")
+
+    def start_stop_record(self):
+        if not self.start:
+            self.start = True
+            self.pushButton_start_record.setStyleSheet("background-color: red")
+        else:
+            self.start = False
+            self.pushButton_start_record.setStyleSheet("background-color: white")
+            with open('num_sound.txt', 'w') as fnum_sound:
+                fnum_sound.write(str(num_sound))
+            try:
+                start_create_wav(list_of_song[-1][1])
+                for song, time in list_of_song:
+                    sound_all(song, time)
+                save_sound(num_sound)
+            except Exception as ex:
+                print(ex)
+                pass
 
 
 app = QApplication(sys.argv)

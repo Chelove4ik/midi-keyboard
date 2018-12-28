@@ -11283,6 +11283,19 @@
     <bool>false</bool>
    </property>
   </widget>
+  <widget class="QPushButton" name="pushButton_start_record">
+   <property name="geometry">
+    <rect>
+     <x>790</x>
+     <y>240</y>
+     <width>131</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Начать запись</string>
+   </property>
+  </widget>
  </widget>
  <resources/>
  <connections/>
