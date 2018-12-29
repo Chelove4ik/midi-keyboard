@@ -1,15 +1,7 @@
 from pydub import AudioSegment
+import os
 
 AudioSegment.converter = r'C:\Users\Денис\Downloads\ffmpeg-4.1-win64-static\bin\ffmpeg.exe'
-
-#sound1 = AudioSegment.from_file("music/1.wav")
-#sound2 = AudioSegment.from_file("music/KYOTO-(SK-16).wav")
-#
-#combined = sound1.overlay(sound2, 100)
-#
-#combined = combined.overlay(sound2, 500)
-#
-#combined.export("combined.wav", format='wav')
 
 
 def start_create_wav(max_time):
@@ -28,4 +20,5 @@ def sound_all(sound, time):
 
 def save_sound(num_of_name):
     global combined
+    os.system('mkdir "Save music"')
     combined.export('Save music/Saved file numder {}.wav'.format(num_of_name), format='wav')
